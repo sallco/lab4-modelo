@@ -31,7 +31,23 @@ cargo run --locked
 
 La ventana mide 1000×700 píxeles. Presionar `Esc` o cerrar la ventana termina el programa. El OBJ se busca en `assets/nave1.obj` dentro del proyecto, sin depender del directorio desde el que se ejecute el binario.
 
-Para generar nuevamente la captura desde la ventana y salir:
+## Controles de exploración
+
+Mantener una tecla presionada modifica la vista de forma continua. La referencia de teclas también aparece en el título de la ventana.
+
+| Teclas | Acción |
+| --- | --- |
+| `←` / `→` | Girar alrededor del eje Y. |
+| `↑` / `↓` | Girar alrededor del eje X. |
+| `Q` / `E` | Girar alrededor del eje Z. |
+| `W` / `A` / `S` / `D` | Mover el modelo arriba, izquierda, abajo y derecha. |
+| `+` / `=` / `-` | Acercar o alejar; también admite `+` y `-` del teclado numérico. |
+| `R` | Restaurar la orientación, el zoom y el centro iniciales. |
+| `Esc` | Salir. |
+
+El zoom permite entre 0.25× y 4×. Al ampliar o desplazar es posible salir del encuadre; `R` devuelve el modelo completo a la ventana.
+
+Para generar nuevamente la captura de la vista inicial y salir:
 
 ```bash
 cargo run --locked -- --screenshot docs/modelo.png
@@ -51,11 +67,12 @@ OBJ → vértices e índices → triángulos → líneas → píxeles → pantal
 | `src/triangle.rs` | Conexión de los tres lados de cada triángulo. |
 | `src/line.rs` | Rasterización de líneas mediante Bresenham. |
 | `src/framebuffer.rs` | Escritura de píxeles con límites de imagen. |
-| `src/main.rs` | Ventana, presentación y captura. |
+| `src/view.rs` | Rotaciones, zoom, desplazamiento y controles de teclado. |
+| `src/main.rs` | Ventana, actualización de la vista y captura. |
 
-El encuadre usa los vértices referenciados por las caras e invierte Y para la pantalla. La imagen estática se rasteriza una vez y se reutiliza al mostrar cada cuadro.
+El encuadre usa los vértices referenciados por las caras e invierte Y para la pantalla. La imagen se vuelve a rasterizar cuando los controles modifican la vista; mientras permanece quieta se reutiliza la textura.
 
-El cargador admite caras trianguladas con índices positivos (`f 1 2 3`, `v/vt` o `v/vt/vn`); ignora texturas, normales y materiales. Rechaza caras sin triangular, índices inexistentes y coordenadas no finitas. La coordenada Z se conserva, pero no se utiliza para dibujar. Esta etapa no aplica perspectiva ni oculta superficies: todas las aristas se superponen y la densidad de la malla hace que algunas zonas parezcan rellenas.
+El cargador admite caras trianguladas con índices positivos (`f 1 2 3`, `v/vt` o `v/vt/vn`); ignora texturas, normales y materiales. Rechaza caras sin triangular, índices inexistentes y coordenadas no finitas. La vista inicial utiliza X/Y; la exploración rota las coordenadas 3D antes de tomar X/Y para dibujar. Se mantiene una proyección sin perspectiva y sin ocultamiento de superficies: todas las aristas se superponen y la densidad de la malla hace que algunas zonas parezcan rellenas.
 
 ## Verificación
 
@@ -65,6 +82,6 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo fmt --check
 ```
 
-Verificado en Linux con Rust 1.99.1 y Raylib para Rust 5.5.1: compilación, ejecución gráfica, siete pruebas y captura PNG. Las pruebas cubren el cargador, líneas, contornos, encuadre y recorrido de los 116,480 triángulos. La captura mide 1000×700 y el modelo ocupa X=60–940 e Y=114–586, centrado y sin recortes.
+Verificado en Linux con Rust 1.99.1 y Raylib para Rust 5.5.1: compilación, ejecución gráfica, doce pruebas y captura PNG. Las pruebas cubren el cargador, líneas, contornos, encuadre, recorrido de los 116,480 triángulos, rotaciones, zoom, desplazamiento y restauración de la vista. La captura mide 1000×700 y el modelo ocupa X=60–940 e Y=114–586, centrado y sin recortes.
 
 La entrega corresponde al enlace de este repositorio con el código, el modelo y la captura incorporados.
