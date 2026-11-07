@@ -55,3 +55,55 @@ pub fn render(framebuffer: &mut Framebuffer, obj: &Obj) -> usize {
     count
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn spaceship_is_centered_fits_and_draws_every_triangle() {
+        let obj = Obj::load(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/nave1.obj")).unwrap();
+        let projected = screen_vertices(&obj);
+        let vertices: Vec<_> = obj.indices.iter().map(|&index| projected[index]).collect();
+        let min_x = vertices.iter().map(|v| v.x).fold(f32::INFINITY, f32::min);
+        let max_x = vertices
+            .iter()
+            .map(|v| v.x)
+            .fold(f32::NEG_INFINITY, f32::max);
+        let min_y = vertices.iter().map(|v| v.y).fold(f32::INFINITY, f32::min);
+        let max_y = vertices
+            .iter()
+            .map(|v| v.y)
+            .fold(f32::NEG_INFINITY, f32::max);
+        assert!(min_x >= MARGIN - 0.01 && max_x <= WIDTH as f32 - MARGIN + 0.01);
+        assert!(min_y >= MARGIN - 0.01 && max_y <= HEIGHT as f32 - MARGIN + 0.01);
+        assert!((min_x + max_x - WIDTH as f32).abs() < 0.01);
+        assert!((min_y + max_y - HEIGHT as f32).abs() < 0.01);
+        assert!((max_x - min_x).max(max_y - min_y) > 500.0);
+        let mut fb = Framebuffer::new(WIDTH, HEIGHT);
+        assert_eq!(render(&mut fb, &obj), 116_480);
+        assert!(
+            fb.image
+                .get_image_data()
+                .iter()
+                .any(|&c| c == Color::new(165, 210, 235, 255))
+        );
+    }
+
+    #[test]
+    fn fits_flat_models_and_single_positions() {
+        for vertices in [
+            vec![Vector3::new(2.0, 3.0, 0.0)],
+            vec![Vector3::new(2.0, -3.0, 0.0), Vector3::new(2.0, 3.0, 0.0)],
+        ] {
+            let obj = Obj {
+                vertices,
+                indices: vec![0, 0, 0],
+            };
+            assert!(
+                screen_vertices(&obj)
+                    .iter()
+                    .all(|v| v.x.is_finite() && v.y.is_finite())
+            );
+        }
+    }
+}
