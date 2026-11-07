@@ -35,7 +35,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let obj = Obj::load(&path)
         .map_err(|error| io::Error::new(error.kind(), format!("{}: {error}", path.display())))?;
     let mut framebuffer = Framebuffer::new(WIDTH, HEIGHT);
-    let count = render(&mut framebuffer, &obj, &View::default());
+    let mut view = View::default();
+    let count = render(&mut framebuffer, &obj, &view);
     println!(
         "OBJ cargado: {} vértices, {} índices; {count} triángulos dibujados.",
         obj.vertices.len(),
@@ -44,11 +45,21 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let (mut window, thread) = raylib::init()
         .size(WIDTH, HEIGHT)
-        .title("Lab 4: Modelo OBJ | Nave | Esc: salir")
+        .title("Lab 4 | Flechas/Q/E: girar | +/-: zoom | WASD: mover | R: reiniciar | Esc: salir")
         .build();
     window.set_target_fps(60);
-    let texture = window.load_texture_from_image(&thread, &framebuffer.image)?;
+    let mut texture = window.load_texture_from_image(&thread, &framebuffer.image)?;
     while !window.window_should_close() {
+        if view.update(window.get_frame_time(), |key| window.is_key_down(key)) {
+            render(&mut framebuffer, &obj, &view);
+            let pixels: Vec<u8> = framebuffer
+                .image
+                .get_image_data()
+                .iter()
+                .flat_map(|color| [color.r, color.g, color.b, color.a])
+                .collect();
+            texture.update_texture(&pixels)?;
+        }
         let mut drawing = window.begin_drawing(&thread);
         drawing.clear_background(Color::BLACK);
         drawing.draw_texture(&texture, 0, 0, Color::WHITE);
