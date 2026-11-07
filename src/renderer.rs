@@ -1,4 +1,4 @@
-use crate::obj::Obj;
+use crate::{framebuffer::Framebuffer, obj::Obj, triangle::triangle};
 use raylib::prelude::*;
 
 pub const WIDTH: i32 = 1000;
@@ -40,5 +40,18 @@ pub fn screen_vertices(obj: &Obj) -> Vec<Vector2> {
             )
         })
         .collect()
+}
+
+pub fn render(framebuffer: &mut Framebuffer, obj: &Obj) -> usize {
+    let vertices = screen_vertices(obj);
+    let mut count = 0;
+    for indices in obj.indices.as_chunks::<3>().0 {
+        let a = vertices[indices[0]];
+        let b = vertices[indices[1]];
+        let c = vertices[indices[2]];
+        triangle(framebuffer, a, b, c, Color::new(165, 210, 235, 255));
+        count += 1;
+    }
+    count
 }
 
