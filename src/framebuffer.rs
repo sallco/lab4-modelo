@@ -1,5 +1,7 @@
 use raylib::prelude::*;
 
+const BACKGROUND: Color = Color::new(13, 13, 20, 255);
+
 pub struct Framebuffer {
     pub image: Image,
 }
@@ -7,8 +9,12 @@ pub struct Framebuffer {
 impl Framebuffer {
     pub fn new(width: i32, height: i32) -> Self {
         Self {
-            image: Image::gen_image_color(width, height, Color::new(13, 13, 20, 255)),
+            image: Image::gen_image_color(width, height, BACKGROUND),
         }
+    }
+
+    pub fn clear(&mut self) {
+        self.image.clear_background(BACKGROUND);
     }
 
     pub fn point(&mut self, position: Vector2, color: Color) {

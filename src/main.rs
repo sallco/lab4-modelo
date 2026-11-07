@@ -2,6 +2,7 @@ use lab4_modelo::{
     framebuffer::Framebuffer,
     obj::Obj,
     renderer::{HEIGHT, WIDTH, render},
+    view::View,
 };
 use raylib::prelude::*;
 use std::{io, path::PathBuf, process::ExitCode};
@@ -34,7 +35,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let obj = Obj::load(&path)
         .map_err(|error| io::Error::new(error.kind(), format!("{}: {error}", path.display())))?;
     let mut framebuffer = Framebuffer::new(WIDTH, HEIGHT);
-    let count = render(&mut framebuffer, &obj);
+    let count = render(&mut framebuffer, &obj, &View::default());
     println!(
         "OBJ cargado: {} vértices, {} índices; {count} triángulos dibujados.",
         obj.vertices.len(),
