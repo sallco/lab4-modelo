@@ -75,3 +75,42 @@ impl Obj {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn loads_positions_and_converts_face_indices() {
+        let obj =
+            Obj::parse("# prueba\nv 1 2 3\nv 4 5 6\nv 7 8 9\nvt 0 0\nf 3/1/2 1//2 2 # cara\n")
+                .unwrap();
+        assert_eq!(obj.vertices.len(), 3);
+        assert_eq!(obj.vertices[0], Vector3::new(1.0, 2.0, 3.0));
+        assert_eq!(obj.indices, [2, 0, 1]);
+    }
+
+    #[test]
+    fn rejects_invalid_geometry() {
+        let vertices = "v 0 0 0\nv 1 0 0\nv 0 1 0\n";
+        for face in [
+            "f 0 2 3",
+            "f -1 2 3",
+            "f 1 2 4",
+            "f 1 2",
+            "f 1 2 3 1",
+            "f x 2 3",
+        ] {
+            assert!(Obj::parse(&format!("{vertices}{face}")).is_err(), "{face}");
+        }
+        for source in ["", "v NaN 0 0\nf 1 1 1", "v 1 2\nf 1 1 1"] {
+            assert!(Obj::parse(source).is_err());
+        }
+    }
+
+    #[test]
+    fn loads_the_complete_spaceship() {
+        let obj = Obj::load(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/nave1.obj")).unwrap();
+        assert_eq!(obj.vertices.len(), 58_384);
+        assert_eq!(obj.indices.len(), 116_480 * 3);
+    }
+}
