@@ -6,6 +6,8 @@ Carga la nave del laboratorio de Blender y dibuja el contorno de sus 116,480 tri
 
 ![Nave OBJ renderizada con sus aristas](docs/modelo.png)
 
+![Nave OBJ renderizada con sus aristas](docs/modelo(2).png)
+
 ## Requisitos del laboratorio
 
 - Leer el archivo OBJ y almacenar sus vértices e índices.
